@@ -17,8 +17,9 @@ import com.google.common.io.ByteStreams;
 
 import de.zalando.tip.zalenium.util.Dashboard;
 
-// We use this class name to be able to go to the resource like this: http://localhost:4444/grid/admin/cleanup
 public class Cleanup extends RegistryBasedServlet {
+
+    private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = Logger.getLogger(Cleanup.class.getName());
 
