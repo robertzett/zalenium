@@ -15,8 +15,6 @@ import org.junit.rules.TemporaryFolder;
 
 public class DashboardTest {
 
-    public static final String TEST_COUNT_FILE_NAME = "amount_of_run_tests.txt";
-
     private TestInformation ti = new TestInformation("seleniumSessionId", "testName", "proxyName", "browser",
             "browserVersion", "platform");
 
@@ -59,11 +57,28 @@ public class DashboardTest {
     @Test
     public void nonNumberContentsIgnored() throws IOException {
         File testCountFile = new File(temporaryFolder.getRoot().getAbsolutePath() + "/" + Dashboard.VIDEOS_FOLDER_NAME
-                + "/" + TEST_COUNT_FILE_NAME);
+                + "/" + Dashboard.AMOUNT_OF_RUN_TESTS_FILE_NAME);
         FileUtils.writeStringToFile(testCountFile, "Not-A-Number", UTF_8);
         Dashboard.setExecutedTests(0);
         Dashboard.updateDashboard(ti);
         Assert.assertEquals("1", FileUtils.readFileToString(testCountFile, UTF_8));
+    }
+
+    @Test
+    public void clearRecordedVideosAndLogs() throws IOException {
+        fileInTempVideosFolder("fake_video.mp4").createNewFile();
+        fileInTempVideosFolder("logs").mkdir();
+
+        Dashboard.clearRecordedVideosAndLogs();
+
+        Assert.assertFalse(fileInTempVideosFolder("fake_video.mp4").exists());
+        Assert.assertFalse(fileInTempVideosFolder("logs").exists());
+        Assert.assertFalse(fileInTempVideosFolder(Dashboard.LIST_FILE_NAME).exists());
+    }
+
+    private File fileInTempVideosFolder(String fileName) {
+        String tempVideoFolder = temporaryFolder.getRoot().getAbsolutePath() + "/" + Dashboard.VIDEOS_FOLDER_NAME;
+        return new File(tempVideoFolder + "/" + fileName);
     }
 
     private void cleanTempVideosFolder() throws IOException {

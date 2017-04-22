@@ -68,7 +68,7 @@ public class Cleanup extends RegistryBasedServlet {
 
         String resultMsg;
         if (action != null && action.equals("doCleanupAll")) {
-            Dashboard.clearRecordedVideos();
+            Dashboard.clearRecordedVideosAndLogs();
 
             resultMsg = "SUCCESS";
             response.setStatus(200);

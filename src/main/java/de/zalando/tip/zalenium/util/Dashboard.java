@@ -20,9 +20,15 @@ import static java.nio.charset.StandardCharsets.*;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class Dashboard {
 
+    public static final String ZALANDO_ICO_FILE_NAME = "zalando.ico";
+    private static final String DASHBOARD_TEMPLATE_FILE_NAME = "dashboard_template.html";
+    private static final String DASHBOARD_FILE_NAME = "dashboard.html";
+    public static final String AMOUNT_OF_RUN_TESTS_FILE_NAME = "amount_of_run_tests.txt";
+    public static final String LIST_FILE_NAME = "list.html";
     @SuppressWarnings("WeakerAccess")
     public static final String VIDEOS_FOLDER_NAME = "videos";
     public static final String LOGS_FOLDER_NAME = "logs";
+    public static final String LIST_TEMPLATE_FILE_NAME = "list_template.html";
     private static final Logger LOGGER = Logger.getLogger(Dashboard.class.getName());
     private static CommonProxyUtilities commonProxyUtilities = new CommonProxyUtilities();
     private static int executedTests = 0;
@@ -37,14 +43,16 @@ public class Dashboard {
         Dashboard.executedTests = executedTests;
     }
 
-    public static synchronized void clearRecordedVideos() throws IOException {
+    public static synchronized void clearRecordedVideosAndLogs() throws IOException {
         String currentLocalPath = commonProxyUtilities.currentLocalPath();
         String localVideosPath = currentLocalPath + "/" + VIDEOS_FOLDER_NAME;
-        FileUtils.deleteQuietly(new File(localVideosPath+"/list.html"));
-        FileUtils.deleteQuietly(new File(localVideosPath+"/dashboard.html"));
-        FileUtils.deleteQuietly(new File(localVideosPath+"/amount_of_run_tests.txt"));
+        deleteGeneratedFiles(localVideosPath);
+        deleteLogsAndVideos(localVideosPath);
         setExecutedTests(0);
-        FileUtils.deleteDirectory(new File(localVideosPath+"/logs"));
+    }
+
+    private static void deleteLogsAndVideos(String localVideosPath) throws IOException {
+        FileUtils.deleteDirectory(new File(localVideosPath + "/" + LOGS_FOLDER_NAME));
         FileFilter fileFilter = new WildcardFileFilter("*.mp4");
         File[] mp4Files = new File(localVideosPath).listFiles(fileFilter);
         for (File file : mp4Files) {
@@ -52,21 +60,27 @@ public class Dashboard {
         }
     }
 
+    private static void deleteGeneratedFiles(String localVideosPath) {
+        FileUtils.deleteQuietly(new File(localVideosPath + "/" + LIST_FILE_NAME));
+        FileUtils.deleteQuietly(new File(localVideosPath + "/" + DASHBOARD_FILE_NAME));
+        FileUtils.deleteQuietly(new File(localVideosPath + "/" + AMOUNT_OF_RUN_TESTS_FILE_NAME));
+    }
+
     public static synchronized void updateDashboard(TestInformation testInformation) throws IOException {
         String currentLocalPath = commonProxyUtilities.currentLocalPath();
         String localVideosPath = currentLocalPath + "/" + VIDEOS_FOLDER_NAME;
 
-        String testEntry = FileUtils.readFileToString(new File(currentLocalPath, "list_template.html"), UTF_8);
-        testEntry = testEntry.replace("{fileName}", testInformation.getFileName()).
-                replace("{testName}", testInformation.getTestName()).
-                replace("{dateAndTime}", commonProxyUtilities.getShortDateAndTime()).
-                replace("{browserAndPlatform}", testInformation.getBrowserAndPlatform()).
-                replace("{proxyName}", testInformation.getProxyName()).
-                replace("{seleniumLogFileName}", testInformation.getSeleniumLogFileName()).
-                replace("{browserDriverLogFileName}", testInformation.getBrowserDriverLogFileName()).
-                replace("{browserConsoleLogFileName}", testInformation.getBrowserConsoleLogFileName());
+        String testEntry = FileUtils.readFileToString(new File(currentLocalPath, LIST_TEMPLATE_FILE_NAME), UTF_8);
+        testEntry = testEntry.replace("{fileName}", testInformation.getFileName())
+                .replace("{testName}", testInformation.getTestName())
+                .replace("{dateAndTime}", commonProxyUtilities.getShortDateAndTime())
+                .replace("{browserAndPlatform}", testInformation.getBrowserAndPlatform())
+                .replace("{proxyName}", testInformation.getProxyName())
+                .replace("{seleniumLogFileName}", testInformation.getSeleniumLogFileName())
+                .replace("{browserDriverLogFileName}", testInformation.getBrowserDriverLogFileName())
+                .replace("{browserConsoleLogFileName}", testInformation.getBrowserConsoleLogFileName());
 
-        File testList = new File(localVideosPath, "list.html");
+        File testList = new File(localVideosPath, LIST_FILE_NAME);
         // Putting the new entry at the top
         if (testList.exists()) {
             if (isFileOlderThanOneDay(testList.lastModified())) {
@@ -80,32 +94,37 @@ public class Dashboard {
         FileUtils.writeStringToFile(testList, testEntry, UTF_8);
 
         executedTests++;
-
-        File testCountFile = new File(localVideosPath, "amount_of_run_tests.txt");
+        File testCountFile = new File(localVideosPath, AMOUNT_OF_RUN_TESTS_FILE_NAME);
         synchronizeTestsCountWithFile(testCountFile);
-
         LOGGER.log(Level.FINE, "Test count: " + executedTests);
         FileUtils.writeStringToFile(testCountFile, String.valueOf(executedTests), UTF_8);
 
-        File dashboardHtml = new File(localVideosPath, "dashboard.html");
-        String dashboard = FileUtils.readFileToString(new File(currentLocalPath, "dashboard_template.html"), UTF_8);
-        dashboard = dashboard.replace("{testList}", testEntry).
-                replace("{executedTests}", String.valueOf(executedTests));
+        generateDashboardHtml(executedTests, testEntry, localVideosPath, currentLocalPath);
+        copyResources(localVideosPath, currentLocalPath);
+    }
+
+    private static void generateDashboardHtml(int numTests, String testEntry, String localVideosPath,
+            String currentLocalPath) throws IOException {
+        File dashboardHtml = new File(localVideosPath, DASHBOARD_FILE_NAME);
+        String dashboard = FileUtils.readFileToString(new File(currentLocalPath, DASHBOARD_TEMPLATE_FILE_NAME), UTF_8);
+        dashboard = dashboard.replace("{testList}", testEntry).replace("{executedTests}",
+                String.valueOf(executedTests));
         FileUtils.writeStringToFile(dashboardHtml, dashboard, UTF_8);
+    }
 
-        File zalandoIco = new File(localVideosPath, "zalando.ico");
+    private static void copyResources(String localVideosPath, String currentLocalPath) throws IOException {
+        File zalandoIco = new File(localVideosPath, ZALANDO_ICO_FILE_NAME);
         if (!zalandoIco.exists()) {
-            FileUtils.copyFile(new File(currentLocalPath, "zalando.ico"), zalandoIco);
+            FileUtils.copyFile(new File(currentLocalPath, ZALANDO_ICO_FILE_NAME), zalandoIco);
         }
+        copyFolderIfAbsent("css", localVideosPath, currentLocalPath);
+        copyFolderIfAbsent("js", localVideosPath, currentLocalPath);
+    }
 
-        File cssFolder = new File(localVideosPath + "/css");
-        File jsFolder = new File(localVideosPath + "/js");
-
-        if (!cssFolder.exists()) {
-            FileUtils.copyDirectory(new File(currentLocalPath + "/css"), cssFolder);
-        }
-        if (!jsFolder.exists()) {
-            FileUtils.copyDirectory(new File(currentLocalPath + "/js"), jsFolder);
+    private static void copyFolderIfAbsent(String folderName, String targetPath, String sourcePath) throws IOException {
+        File targetFolder = new File(targetPath + "/" + folderName);
+        if (!targetFolder.exists()) {
+            FileUtils.copyDirectory(new File(sourcePath + "/" + folderName), targetFolder);
         }
     }
 
