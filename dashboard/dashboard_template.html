@@ -214,7 +214,7 @@
     var $btn = $(this).button('cleanup');
   $.ajax({
      url:  '/cleanup?action=doCleanupAll',
-     type: 'GET',
+     type: 'POST',
      success: function(html){
          $btn.button('reset');
      },

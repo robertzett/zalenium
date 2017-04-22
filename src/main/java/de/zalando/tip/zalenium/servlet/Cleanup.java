@@ -3,6 +3,7 @@ package de.zalando.tip.zalenium.servlet;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +37,7 @@ public class Cleanup extends RegistryBasedServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            process(request, response);
+            sendMessage(response, "ERROR GET request not implemented", 400);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.toString(), e);
         }
@@ -54,30 +55,33 @@ public class Cleanup extends RegistryBasedServlet {
 
     @SuppressWarnings("WeakerAccess")
     protected void process(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
         String action = "";
-
         try {
             action = request.getParameter("action");
         } catch (Exception e) {
             LOGGER.log(Level.FINE, e.toString(), e);
         }
 
-        response.setContentType("text/plain");
-        response.setCharacterEncoding("UTF-8");
-
         String resultMsg;
+        int responseStatus;
         if (action != null && action.equals("doCleanupAll")) {
             Dashboard.clearRecordedVideosAndLogs();
-
             resultMsg = "SUCCESS";
-            response.setStatus(200);
+            responseStatus = 200;
         } else {
             resultMsg = "ERROR action not implemented. Given action=" + action;
-            response.setStatus(400);
+            responseStatus = 400;
         }
+        sendMessage(response, resultMsg, responseStatus);
+    }
 
-        try (InputStream in = new ByteArrayInputStream(resultMsg.getBytes("UTF-8"))) {
+    private void sendMessage(HttpServletResponse response, String message, int statusCode)
+            throws UnsupportedEncodingException, IOException {
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(statusCode);
+
+        try (InputStream in = new ByteArrayInputStream(message.getBytes("UTF-8"))) {
             ByteStreams.copy(in, response.getOutputStream());
         } finally {
             response.getOutputStream().close();
