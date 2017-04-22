@@ -2,8 +2,10 @@ package de.zalando.tip.zalenium.util;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Level;
@@ -33,6 +35,21 @@ public class Dashboard {
     @VisibleForTesting
     static void setExecutedTests(int executedTests) {
         Dashboard.executedTests = executedTests;
+    }
+
+    public static synchronized void clearRecordedVideos() throws IOException {
+        String currentLocalPath = commonProxyUtilities.currentLocalPath();
+        String localVideosPath = currentLocalPath + "/" + VIDEOS_FOLDER_NAME;
+        FileUtils.deleteQuietly(new File(localVideosPath+"/list.html"));
+        FileUtils.deleteQuietly(new File(localVideosPath+"/dashboard.html"));
+        FileUtils.deleteQuietly(new File(localVideosPath+"/amount_of_run_tests.txt"));
+        setExecutedTests(0);
+        FileUtils.deleteDirectory(new File(localVideosPath+"/logs"));
+        FileFilter fileFilter = new WildcardFileFilter("*.mp4");
+        File[] mp4Files = new File(localVideosPath).listFiles(fileFilter);
+        for (File file : mp4Files) {
+            file.delete();
+        }
     }
 
     public static synchronized void updateDashboard(TestInformation testInformation) throws IOException {

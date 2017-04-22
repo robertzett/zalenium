@@ -30,6 +30,9 @@
             <ul id="tests" class="nav nav-pills flex-column">
                 <li class="nav-item">
                     <h6 class="nav-link bg-success text-white text-center font-weight-bold">Tests ({executedTests})</h6>
+<button type="button" id="cleanupButton" data-cleanup-text="cleaning up..." class="btn btn-primary">
+  Remove all history
+</button>
                 </li>
 
                 {testList}
@@ -205,6 +208,22 @@
         $('#tests').load(document.URL +  ' #tests');
     }, 10000);
 
+</script>
+<script>
+  $('#cleanupButton').on('click', function () {
+    var $btn = $(this).button('cleanup');
+  $.ajax({
+     url:  '/cleanup?action=doCleanupAll',
+     type: 'GET',
+     success: function(html){
+         $btn.button('reset');
+     },
+     error: function(){
+       alert("error");
+     }
+     });
+  window.location.href = "/";
+  })
 </script>
 </body>
 </html>
