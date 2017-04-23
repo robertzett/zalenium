@@ -7,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,24 +17,23 @@ import com.google.common.io.ByteStreams;
 
 import de.zalando.tip.zalenium.util.Dashboard;
 
-public class Cleanup extends RegistryBasedServlet {
+public class CleanupService extends RegistryBasedServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Logger LOGGER = Logger.getLogger(Cleanup.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(CleanupService.class.getName());
 
     @SuppressWarnings("unused")
-    public Cleanup() {
+    public CleanupService() {
         this(null);
     }
 
-    public Cleanup(Registry registry) {
+    public CleanupService(Registry registry) {
         super(registry);
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         try {
             sendMessage(response, "ERROR GET request not implemented", 400);
         } catch (Exception e) {
@@ -44,8 +42,7 @@ public class Cleanup extends RegistryBasedServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         try {
             process(request, response);
         } catch (Exception e) {

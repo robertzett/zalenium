@@ -49,14 +49,17 @@ public class Dashboard {
         deleteGeneratedFiles(localVideosPath);
         deleteLogsAndVideos(localVideosPath);
         setExecutedTests(0);
+        generateDashboardHtml(executedTests, "", localVideosPath, currentLocalPath);
     }
 
     private static void deleteLogsAndVideos(String localVideosPath) throws IOException {
         FileUtils.deleteDirectory(new File(localVideosPath + "/" + LOGS_FOLDER_NAME));
         FileFilter fileFilter = new WildcardFileFilter("*.mp4");
         File[] mp4Files = new File(localVideosPath).listFiles(fileFilter);
-        for (File file : mp4Files) {
-            file.delete();
+        if (mp4Files != null) {
+            for (File file : mp4Files) {
+                file.delete();
+            }
         }
     }
 
