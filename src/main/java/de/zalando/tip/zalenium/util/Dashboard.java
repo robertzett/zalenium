@@ -49,7 +49,6 @@ public class Dashboard {
         deleteGeneratedFiles(localVideosPath);
         deleteLogsAndVideos(localVideosPath);
         setExecutedTests(0);
-        generateDashboardHtml(executedTests, "", localVideosPath, currentLocalPath);
     }
 
     private static void deleteLogsAndVideos(String localVideosPath) throws IOException {
