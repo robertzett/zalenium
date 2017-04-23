@@ -29,13 +29,12 @@
         <nav class="col-sm-4 col-md-3 hidden-xs-down bg-faded sidebar">
             <ul id="tests" class="nav nav-pills flex-column">
                 <li class="nav-item">
-                    <h6 class="nav-link bg-success text-white text-center font-weight-bold">Tests ({executedTests})</h6>
-                </li>
-                <li class="nav-item">
-                    <button type="button" id="cleanupButton" data-cleanup-text="cleaning up..."
-                      class="btn btn-primary" title="Important: this will remove all video files and logs!!">
-                        Remove all history
-                    </button>
+                    <form action="/">
+                        <h6 class="nav-link bg-success text-white text-center font-weight-bold">Tests ({executedTests})
+                            <input type="submit" id="cleanupButton" class="btn btn-outline-danger btn-sm" 
+                              title="Important: this will remove all video files and logs!!" value="Remove all history" />
+                        </h6>
+                    </form>
                 </li>
 
                 {testList}
@@ -213,19 +212,14 @@
 
 </script>
 <script>
-  $('#cleanupButton').on('click', function () {
-    var $btn = $(this).button('cleanup');
-  $.ajax({
-     url:  '/cleanup?action=doCleanupAll',
-     type: 'POST',
-     success: function(html){
-         $btn.button('reset');
-     },
-     error: function(){
-       alert("error");
-     }
-     });
-  window.location.href = "/";
+    $('#cleanupButton').on('click', function () {
+        $.ajax({
+            url:  '/cleanup?action=doCleanupAll',
+            type: 'POST',
+            error: function(){
+                alert("ERROR occured while trying to clean the history");
+            }
+        });
   })
 </script>
 </body>
