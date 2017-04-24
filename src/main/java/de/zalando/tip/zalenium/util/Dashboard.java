@@ -20,15 +20,15 @@ import static java.nio.charset.StandardCharsets.*;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class Dashboard {
 
-    public static final String ZALANDO_ICO_FILE_NAME = "zalando.ico";
-    private static final String DASHBOARD_TEMPLATE_FILE_NAME = "dashboard_template.html";
-    private static final String DASHBOARD_FILE_NAME = "dashboard.html";
+    public static final String DASHBOARD_TEMPLATE_FILE_NAME = "dashboard_template.html";
+    public static final String DASHBOARD_FILE_NAME = "dashboard.html";
     public static final String AMOUNT_OF_RUN_TESTS_FILE_NAME = "amount_of_run_tests.txt";
     public static final String LIST_FILE_NAME = "list.html";
+    public static final String LIST_TEMPLATE_FILE_NAME = "list_template.html";
+    public static final String ZALANDO_ICO_FILE_NAME = "zalando.ico";
     @SuppressWarnings("WeakerAccess")
     public static final String VIDEOS_FOLDER_NAME = "videos";
     public static final String LOGS_FOLDER_NAME = "logs";
-    public static final String LIST_TEMPLATE_FILE_NAME = "list_template.html";
     private static final Logger LOGGER = Logger.getLogger(Dashboard.class.getName());
     private static CommonProxyUtilities commonProxyUtilities = new CommonProxyUtilities();
     private static int executedTests = 0;
