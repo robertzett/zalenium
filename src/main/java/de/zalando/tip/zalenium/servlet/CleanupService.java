@@ -3,7 +3,6 @@ package de.zalando.tip.zalenium.servlet;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,8 +18,9 @@ import de.zalando.tip.zalenium.util.Dashboard;
 
 public class CleanupService extends RegistryBasedServlet {
 
-    private static final long serialVersionUID = 1L;
+    public static final String DO_CLEANUP_ALL = "doCleanupAll";
 
+    private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = Logger.getLogger(CleanupService.class.getName());
 
     @SuppressWarnings("unused")
@@ -61,7 +61,7 @@ public class CleanupService extends RegistryBasedServlet {
 
         String resultMsg;
         int responseStatus;
-        if (action != null && action.equals("doCleanupAll")) {
+        if (DO_CLEANUP_ALL.equals(action)) {
             Dashboard.clearRecordedVideosAndLogs();
             resultMsg = "SUCCESS";
             responseStatus = 200;
@@ -72,8 +72,7 @@ public class CleanupService extends RegistryBasedServlet {
         sendMessage(response, resultMsg, responseStatus);
     }
 
-    private void sendMessage(HttpServletResponse response, String message, int statusCode)
-            throws UnsupportedEncodingException, IOException {
+    private void sendMessage(HttpServletResponse response, String message, int statusCode) throws IOException {
         response.setContentType("text/plain");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(statusCode);

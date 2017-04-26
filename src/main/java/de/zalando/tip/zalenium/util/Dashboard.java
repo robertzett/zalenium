@@ -33,6 +33,10 @@ public class Dashboard {
     private static CommonProxyUtilities commonProxyUtilities = new CommonProxyUtilities();
     private static int executedTests = 0;
 
+    private Dashboard() {
+        // only static methods
+    }
+
     @VisibleForTesting
     public static int getExecutedTests() {
         return executedTests;
@@ -57,8 +61,14 @@ public class Dashboard {
         File[] mp4Files = new File(localVideosPath).listFiles(fileFilter);
         if (mp4Files != null) {
             for (File file : mp4Files) {
-                file.delete();
+                deleteFileAndLogErrors(file);
             }
+        }
+    }
+
+    private static void deleteFileAndLogErrors(File file) {
+        if (!FileUtils.deleteQuietly(file)) {
+            LOGGER.log(Level.SEVERE, "ERROR deleting file named: %s", file.getName());
         }
     }
 
@@ -86,8 +96,8 @@ public class Dashboard {
         // Putting the new entry at the top
         if (testList.exists()) {
             if (isFileOlderThanOneDay(testList.lastModified())) {
-                LOGGER.log(Level.FINE, "Deleting file older than one day: " + testList.getAbsolutePath());
-                testList.delete();
+                LOGGER.log(Level.FINE, "Deleting file older than one day: %s", testList.getAbsolutePath());
+                deleteFileAndLogErrors(testList);
             } else {
                 String testListContents = FileUtils.readFileToString(testList, UTF_8);
                 testEntry = testEntry.concat("\n").concat(testListContents);
@@ -98,7 +108,7 @@ public class Dashboard {
         executedTests++;
         File testCountFile = new File(localVideosPath, AMOUNT_OF_RUN_TESTS_FILE_NAME);
         synchronizeTestsCountWithFile(testCountFile);
-        LOGGER.log(Level.FINE, "Test count: " + executedTests);
+        LOGGER.log(Level.FINE, "Test count: %s", executedTests);
         FileUtils.writeStringToFile(testCountFile, String.valueOf(executedTests), UTF_8);
 
         generateDashboardHtml(executedTests, testEntry, localVideosPath, currentLocalPath);
@@ -110,7 +120,7 @@ public class Dashboard {
         File dashboardHtml = new File(localVideosPath, DASHBOARD_FILE_NAME);
         String dashboard = FileUtils.readFileToString(new File(currentLocalPath, DASHBOARD_TEMPLATE_FILE_NAME), UTF_8);
         dashboard = dashboard.replace("{testList}", testEntry).replace("{executedTests}",
-                String.valueOf(executedTests));
+                String.valueOf(numTests));
         FileUtils.writeStringToFile(dashboardHtml, dashboard, UTF_8);
     }
 
@@ -134,8 +144,8 @@ public class Dashboard {
     static void synchronizeTestsCountWithFile(File testCountFile) throws IOException {
         if (testCountFile.exists()) {
             if (isFileOlderThanOneDay(testCountFile.lastModified())) {
-                LOGGER.log(Level.FINE, "Deleting file older than one day: " + testCountFile.getAbsolutePath());
-                testCountFile.delete();
+                LOGGER.log(Level.FINE, "Deleting file older than one day: %s", testCountFile.getAbsolutePath());
+                deleteFileAndLogErrors(testCountFile);
             } else {
                 String executedTestsFromFile = FileUtils.readFileToString(testCountFile, UTF_8);
                 try {
